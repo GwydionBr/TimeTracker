@@ -10,6 +10,13 @@ def create_menu_item(menu, label, func):
     menu.Append(item)
     return item
 
+def convert_seconds_to_time(sec):
+    seconds = sec % 60
+    minutes = sec // 60
+    hours = minutes // 60
+    minutes = minutes % 60
+
+    return f"hours: {hours}, minutes: {minutes}, seconds:{seconds}"
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
     def __init__(self, frame):
@@ -61,7 +68,10 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         for time in self.times:
             seconds += time
         seconds += self.end_time - self.start_time
-        print(f"Timer stopped with {seconds} seconds")
+        time = convert_seconds_to_time(seconds)
+        with open("data.txt", "a") as file:
+            file.write(f"Project: {self.timer_name}, Time: {time}\n")
+        print(f"Timer stopped with that time: {time}")
 
     def on_exit(self, event):
         self.myapp_frame.Close()
