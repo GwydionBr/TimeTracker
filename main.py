@@ -1,8 +1,8 @@
 import wx
 import wx.adv
 
-TRAY_TOOLTIP = 'Time-Tracker'
-TRAY_ICON = 'clock_icon.png'
+TRAY_TOOLTIP = "Time-Tracker"
+TRAY_ICON = "clock_icon.png"
 
 def create_menu_item(menu, label, func):
     item = wx.MenuItem(menu, -1, label)
@@ -20,9 +20,13 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
-        create_menu_item(menu, 'Say Hello', self.on_hello)
+        create_menu_item(menu, "Pause Timer", self.pause_timer)
         menu.AppendSeparator()
-        create_menu_item(menu, 'Exit', self.on_exit)
+        create_menu_item(menu, "Continue Timer", self.continue_timer)
+        menu.AppendSeparator()
+        create_menu_item(menu, "End Timer", self.stop_timer)
+        menu.AppendSeparator()
+        create_menu_item(menu, "Close Timer App", self.on_exit)
         return menu
 
     def set_icon(self, path):
@@ -30,10 +34,34 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.SetIcon(icon, TRAY_TOOLTIP)
 
     def on_left_down(self, event):
-        print ('Tray icon was left-clicked.')
+        dlg = wx.TextEntryDialog(None, "Enter your text:", "Text Input", "")
+        if dlg.ShowModal() == wx.ID_OK:
+            self.timer_name = dlg.GetValue()
+            print("Entered text:", self.timer_name)
+        dlg.Destroy()
+        self.start_timer()
 
-    def on_hello(self, event):
-        print ('Hello, world!')
+    def start_timer(self):
+        self.start_time = wx.DateTime.GetTimeNow()
+        self.times = []
+        print("Timer started")
+
+    def pause_timer(self, event):
+        self.end_time = wx.DateTime.GetTimeNow()
+        self.times.append(self.end_time - self.start_time)
+        print("Timer paused")
+
+    def continue_timer(self, event):
+        self.start_time = wx.DateTime.GetTimeNow()
+        print("Timer continued")
+
+    def stop_timer(self, event):
+        self.end_time = wx.DateTime.GetTimeNow()
+        seconds = 0
+        for time in self.times:
+            seconds += time
+        seconds += self.end_time - self.start_time
+        print(f"Timer stopped with {seconds} seconds")
 
     def on_exit(self, event):
         self.myapp_frame.Close()
@@ -42,7 +70,7 @@ class My_Application(wx.Frame):
 
     #----------------------------------------------------------------------
     def __init__(self):
-        wx.Frame.__init__(self, None, wx.ID_ANY, "", size=(100,100))
+        wx.Frame.__init__(self, None, wx.ID_ANY, "Time-Tracker")
         panel = wx.Panel(self)
         self.myapp = TaskBarIcon(self)
         self.Bind(wx.EVT_CLOSE, self.onClose)
@@ -55,6 +83,7 @@ class My_Application(wx.Frame):
         self.myapp.RemoveIcon()
         self.myapp.Destroy()
         self.Destroy()
+
 
 if __name__ == "__main__":
     MyApp = wx.App()
