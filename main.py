@@ -1,5 +1,6 @@
 import wx
 import wx.adv
+import datetime as dt
 
 TRAY_TOOLTIP = "Time-Tracker"
 TRAY_ICON = "clock_icon.png"
@@ -40,6 +41,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         icon = wx.Icon(wx.Bitmap(path))
         self.SetIcon(icon, TRAY_TOOLTIP)
 
+    # Left klick on Icon asks for Project-name and starts timer
     def on_left_down(self, event):
         dlg = wx.TextEntryDialog(None, "Enter your text:", "Text Input", "")
         if dlg.ShowModal() == wx.ID_OK:
@@ -70,7 +72,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         seconds += self.end_time - self.start_time
         time = convert_seconds_to_time(seconds)
         with open("data.txt", "a") as file:
-            file.write(f"Project: {self.timer_name}, Time: {time}\n")
+            file.write(f"{dt.datetime.now().strftime("%d.%m.%Y")} / Project: {self.timer_name} / Time: {time}\n")
         print(f"Timer stopped with that time: {time}")
 
     def on_exit(self, event):
