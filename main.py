@@ -48,7 +48,6 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
     # Left klick on Icon asks for Project-name and starts timer
     def on_left_down(self, event):
         if not self.timer_active:
-            self.timer_active = True
             dlg = wx.TextEntryDialog(None, "Enter your text:", "Text Input", "")
             if dlg.ShowModal() == wx.ID_OK:
                 self.timer_name = dlg.GetValue()
@@ -59,39 +58,52 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
             pass
 
     def start_timer(self):
+        self.timer_active = True
         self.start_time = wx.DateTime.GetTimeNow()
         self.times = []
         print("Timer started")
 
     def show_time(self, event):
-        if not self.timer_paused:
-            print(f"Actual time: {self.get_time(wx.DateTime.GetTimeNow(), self.start_time)}")
+        if self.timer_active:
+            if not self.timer_paused:
+                print(f"Actual time: {self.get_time(wx.DateTime.GetTimeNow(), self.start_time)}")
+            else:
+                print(f"Timer is paused. The time before paused is: {self.get_time(0, 0)}")
         else:
-            print(f"Timer is paused. The time before paused is: {self.get_time(0, 0)}")
+            print("No active Timer")
 
     def pause_timer(self, event):
-        if not self.timer_paused:
-            self.timer_paused = True
-            self.end_time = wx.DateTime.GetTimeNow()
-            self.times.append(self.end_time - self.start_time)
-            print("Timer paused")
+        if self.timer_active:
+            if not self.timer_paused:
+                self.timer_paused = True
+                self.end_time = wx.DateTime.GetTimeNow()
+                self.times.append(self.end_time - self.start_time)
+                print("Timer paused")
+            else:
+                print("Timer is already paused.")
         else:
-            print("Timer is already paused.")
+            print("No active Timer")
 
     def continue_timer(self, event):
-        if self.timer_paused:
-            self.timer_paused = False
-            self.start_time = wx.DateTime.GetTimeNow()
-            print("Timer continued")
+        if self.timer_active:
+            if self.timer_paused:
+                self.timer_paused = False
+                self.start_time = wx.DateTime.GetTimeNow()
+                print("Timer continued")
+            else:
+                print("Timer is not paused")
         else:
-            print("Timer is not paused")
+            print("No active Timer")
 
     def stop_timer(self, event):
-        self.timer_active = False
-        time = self.get_time(wx.DateTime.GetTimeNow(), self.start_time)
-        with open("data.txt", "a") as file:
-            file.write(f"{dt.datetime.now().strftime("%d.%m.%Y")} / Project: {self.timer_name} / Time: {time}\n")
-        print(f"Timer stopped with that time: {time}")
+        if self.timer_active:
+            self.timer_active = False
+            time = self.get_time(wx.DateTime.GetTimeNow(), self.start_time)
+            with open("data.txt", "a") as file:
+                file.write(f"{dt.datetime.now().strftime("%d.%m.%Y")} / Project: {self.timer_name} / Time: {time}\n")
+            print(f"Timer stopped with that time: {time}")
+        else:
+            print("No active Timer")
 
     def get_time(self, end_time, start_time):
         seconds = 0
