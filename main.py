@@ -52,8 +52,8 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
             if dlg.ShowModal() == wx.ID_OK:
                 self.timer_name = dlg.GetValue()
                 print("Entered text:", self.timer_name)
+                self.start_timer()
             dlg.Destroy()
-            self.start_timer()
         else:
             pass
 
